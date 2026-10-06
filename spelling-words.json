@@ -1,0 +1,26 @@
+{
+  "week": "Week 1",
+  "title": "Spelling Practice",
+  "lists": {
+    "1A": {
+      "title": "List 1A",
+      "words": ["1Aword1", "1Aword2", "1Aword3", "1Aword4", "1Aword5", "1Aword6", "1Aword7", "1Aword8", "1Aword9", "1Aword10", "1Aword11", "1Aword12", "1Aword13", "1Aword14", "1Aword15"],
+      "bonus": ""
+    },
+    "1B": {
+      "title": "List 1B",
+      "words": ["1Bword1", "1Bword2", "1Bword3", "1Bword4", "1Bword5", "1Bword6", "1Bword7", "1Bword8", "1Bword9", "1Bword10", "1Bword11", "1Bword12", "1Bword13", "1Bword14", "1Bword15"],
+      "bonus": ""
+    },
+    "2A": {
+      "title": "List 2A",
+      "words": ["2Aword1", "2Aword2", "2Aword3", "2Aword4", "2Aword5", "2Aword6", "2Aword7", "2Aword8", "2Aword9", "2Aword10", "2Aword11", "2Aword12", "2Aword13", "2Aword14", "2Aword15"],
+      "bonus": ""
+    },
+    "2B": {
+      "title": "List 2B",
+      "words": ["2Bword1", "2Bword2", "2Bword3", "2Bword4", "2Bword5", "2Bword6", "2Bword7", "2Bword8", "2Bword9", "2Bword10", "2Bword11", "2Bword12", "2Bword13", "2Bword14", "2Bword15"],
+      "bonus": ""
+    }
+  }
+}

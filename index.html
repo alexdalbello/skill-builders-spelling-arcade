@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#43266e">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.png">
+<title>Spelling Arcade</title>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#fff;background:#15112b}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at top,#5b3a92 0,#292052 38%,#15112b 78%);color:#fff}
+button,input{font:inherit}
+button{touch-action:manipulation}
+main{max-width:980px;margin:auto;padding:18px 14px 70px}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+header .title{flex:1;min-width:220px}
+h1{font-size:clamp(2rem,7vw,4rem);line-height:1;margin:6px 0}
+h2{margin:6px 0 14px}
+.muted{color:#ddd6fe}.small{font-size:.9rem}
+.panel{background:#ffffff12;border:1px solid #ffffff30;border-radius:24px;padding:18px;margin:14px 0;box-shadow:0 14px 35px #0003}
+.hidden{display:none!important}
+.tags,.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.tag{background:#ffffff1f;border:1px solid #ffffff2d;border-radius:999px;padding:7px 11px;font-weight:750}
+button{border:0;border-radius:15px;padding:13px 17px;background:#facc15;color:#24133f;font-weight:850;cursor:pointer;min-height:48px}
+button.secondary{background:#ffffff16;color:#fff;border:1px solid #ffffff38}
+button.danger{background:#be3455;color:#fff}
+button:disabled{opacity:.48;cursor:default}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.listGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.listChoice{min-height:92px;font-size:1.35rem;text-align:center}
+@media(max-width:520px){.listGrid{grid-template-columns:1fr}}
+.game{min-height:132px;text-align:left;background:#34275f;color:#fff;border:1px solid #ffffff32}
+.game .emoji{display:block;font-size:2.45rem;margin-bottom:7px}
+.game small{display:block;color:#ddd6fe;font-weight:550;margin-top:4px}
+#stage{min-height:105px;display:grid;place-items:center;font-size:4rem}
+.center{text-align:center}
+.meter{height:15px;background:#ffffff24;border-radius:999px;overflow:hidden;margin:13px 0}
+.meter>div{height:100%;background:#86efac;transition:width .25s}
+.studyWord{font-size:clamp(2.2rem,10vw,4.8rem);font-weight:900;letter-spacing:.03em;margin:18px 0;text-shadow:0 4px 16px #0005}
+.answerBox{min-height:72px;border:2px dashed #ffffff70;border-radius:17px;padding:14px;display:flex;align-items:center;justify-content:center;font-size:clamp(1.5rem,7vw,2.4rem);font-weight:850;letter-spacing:.08em;background:#ffffff0b;word-break:break-all}
+.keyboard{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin:15px auto;max-width:760px}
+.keyboard button{padding:9px 4px;min-height:47px;background:#f8fafc;color:#251642;border-radius:10px}
+.keyboard .wide{grid-column:span 2;background:#d8b4fe}
+.feedback{min-height:44px;font-size:1.16rem;font-weight:800;margin:10px 0}
+.good{color:#86efac}.bad{color:#fda4af}
+.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:15px 0}
+.choices button{background:#f8fafc;color:#251642}
+.letterTray{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.letterTray button{min-width:48px;background:#f8fafc;color:#251642}
+.memoryGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.memoryGrid button{min-height:70px;background:#f8fafc;color:#251642;padding:8px}
+.wordsearch{overflow:auto;margin:12px 0}
+.wordsearch table{border-collapse:separate;border-spacing:4px;margin:auto}
+.wordsearch td{width:34px;height:34px;text-align:center;background:#f8fafc;color:#251642;border-radius:7px;font-weight:850}
+.wordBank{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.wordBank span{padding:5px 9px;background:#ffffff17;border-radius:9px}
+.scoreCards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.scoreCard{background:#ffffff0d;border:1px solid #ffffff25;border-radius:16px;padding:12px}
+.big{font-size:4rem}
+input[type=text]{width:100%;font-size:18px;padding:13px;border-radius:12px;border:2px solid transparent;background:#fff;color:#111827}
+input[type=text]:focus{outline:3px solid #facc15}
+.footer{color:#c4b5fd;font-size:.85rem;margin-top:18px}
+@media(max-width:620px){.panel{padding:14px}.keyboard{grid-template-columns:repeat(7,1fr)}.choices{grid-template-columns:1fr}.memoryGrid{grid-template-columns:repeat(3,1fr)}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="title"><h1>🎮 Spelling Arcade</h1><div class="muted">Study it. Hide it. Spell it. Play it!</div></div>
+  <button id="homeBtn" class="secondary">🏠 Home</button>
+</header>
+
+<section id="loading" class="panel"><h2>Loading spelling words…</h2></section>
+
+<section id="listSelect" class="panel hidden center">
+  <h2>Choose Your Spelling List</h2>
+  <p class="muted">Select the list your teacher assigned to you.</p>
+  <div id="listChoices" class="listGrid"></div>
+</section>
+
+<section id="home" class="panel hidden">
+  <div class="tags"><span class="tag" id="weekTag"></span><span class="tag" id="starTag"></span></div>
+  <h2>Choose your adventure!</h2>
+  <div id="games" class="grid"></div>
+  <div class="row" style="margin-top:16px">
+    <button id="studyBtn">📚 Study My Words</button>
+    <button id="scoresBtn" class="secondary">🏆 My High Scores</button>
+     <button id="changeListBtn" class="secondary">🔄 Change Word List</button>
+  </div>
+  <p class="footer">Your selected list comes from <strong>spelling-words.json</strong>. Scores, stars, and your list choice stay on this device.</p>
+</section>
+
+<section id="study" class="panel hidden center">
+  <div class="tags" style="justify-content:center"><span class="tag" id="studyCount"></span></div>
+  <p class="muted">Look carefully at the word. Tap Hide Word when you're ready, then spell it.</p>
+  <div id="studyWord" class="studyWord"></div>
+  <button id="hideStudy">🙈 Hide Word</button>
+  <div id="studySpell" class="hidden">
+    <div id="studyAnswer" class="answerBox"></div>
+    <div id="studyKeyboard" class="keyboard"></div>
+    <div id="studyFeedback" class="feedback"></div>
+    <div class="row" style="justify-content:center">
+      <button id="checkStudy">Check</button>
+      <button id="nextStudy" class="secondary hidden">Next Word ➜</button>
+    </div>
+  </div>
+</section>
+
+<section id="scores" class="panel hidden">
+  <h2>🏆 My High Scores</h2>
+  <div id="scoreList" class="scoreCards"></div>
+  <div class="row" style="margin-top:15px"><button id="resetScores" class="danger">Reset scores & stars</button></div>
+</section>
+
+<section id="play" class="panel hidden">
+  <div class="tags"><span class="tag" id="modeTag"></span><span class="tag" id="roundTag"></span><span class="tag" id="pointsTag"></span><span class="tag hidden" id="timerTag"></span></div>
+  <div id="stage"></div>
+  <div class="meter"><div id="progress"></div></div>
+  <h2 id="prompt" class="center"></h2>
+  <p id="subprompt" class="center muted"></p>
+  <div id="answerArea"></div>
+  <div id="feedback" class="feedback center" aria-live="polite"></div>
+  <div class="row" style="justify-content:center">
+    <button id="check" class="hidden">Check</button>
+    <button id="next" class="hidden">Next ➜</button>
+    <button id="quit" class="secondary">End Game</button>
+  </div>
+</section>
+
+<section id="finish" class="panel hidden center">
+  <div id="finishIcon" class="big">🏆</div>
+  <h2 id="finishTitle">Adventure complete!</h2>
+  <p id="finishText"></p>
+  <div class="row" style="justify-content:center">
+    <button id="again">Play Again</button>
+    <button id="finishHome" class="secondary">Choose Another Game</button>
+  </div>
+</section>
+</main>
+
+<script>
+(()=>{'use strict';
+const FALLBACK_DATA={week:'Week 1',title:'Spelling Practice',lists:{
+ '1A':{title:'List 1A',words:Array.from({length:15},(_,i)=>'1aword'+(i+1)),bonus:''},
+ '1B':{title:'List 1B',words:Array.from({length:15},(_,i)=>'1bword'+(i+1)),bonus:''},
+ '2A':{title:'List 2A',words:Array.from({length:15},(_,i)=>'2aword'+(i+1)),bonus:''},
+ '2B':{title:'List 2B',words:Array.from({length:15},(_,i)=>'2bword'+(i+1)),bonus:''}
+}};
+const STORE='grade4_spelling_arcade_v2';
+const MODES=[
+ ['boss','🐉','Boss Battle','Spell words to defeat the monster!'],
+ ['race','🏎️','Spelling Race','Race to the finish line!'],
+ ['treasure','💎','Treasure Hunt','Collect gems and find the treasure!'],
+ ['escape','🏰','Escape Castle','Spell words to unlock the doors!'],
+ ['duel','⚔️','Two-Player Duel','Take turns with another player!'],
+ ['time','⏱️','Time Challenge','Score as much as you can in 60 seconds!'],
+ ['search','🔎','Word Search','Find this week’s words in a puzzle!'],
+ ['rocket','🚀','Rocket Rescue','Spell correctly to launch the rocket!'],
+ ['scramble','🔤','Letter Scramble','Unscramble the letters!'],
+ ['memory','🧠','Memory Match','Match words with their twin!'],
+ ['crossword','🧩','Mini Crossword','Use clues to spell the word!'],
+ ['whack','🔨','Whack-a-Word','Tap the correctly spelled word!']
+];
+let data=FALLBACK_DATA, list=FALLBACK_DATA.lists['1A'], state={stars:0,scores:{},selectedList:null}, game=null, studyIndex=0, studyAnswer='';
+const $=id=>document.getElementById(id);
+try{const s=JSON.parse(localStorage.getItem(STORE));if(s)state={...state,...s}}catch(e){}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(state))}catch(e){}}
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function screens(id){['loading','listSelect','home','study','scores','play','finish'].forEach(x=>$(x).classList.toggle('hidden',x!==id));if(id==='home')renderHome();if(id==='scores')renderScores();window.scrollTo(0,0)}
+function allWords(){return list.bonus?[...list.words,list.bonus]:[...list.words]}
+function renderListChoices(){
+ const wrap=$('listChoices'); wrap.replaceChildren();
+ Object.keys(data.lists).forEach(key=>{
+   let b=document.createElement('button'); b.className='listChoice'; b.textContent='📚 '+key;
+   b.addEventListener('click',()=>selectList(key)); wrap.append(b);
+ });
+}
+function selectList(key){
+ if(!data.lists[key])return; state.selectedList=key; list=data.lists[key]; save(); screens('home');
+}
+function chooseList(){renderListChoices();screens('listSelect')}
+function renderHome(){
+ $('weekTag').textContent='📚 '+state.selectedList+' · '+(list.title||'Spelling List')+' · '+allWords().length+' words';
+ $('starTag').textContent='⭐ '+state.stars+' stars';
+ $('games').replaceChildren(...MODES.map(([id,e,n,d])=>{let b=document.createElement('button');b.className='game';b.innerHTML='<span class="emoji">'+e+'</span><strong>'+n+'</strong><small>'+d+'</small>';b.addEventListener('click',()=>start(id));return b}))
+}
+function renderScores(){
+ $('scoreList').replaceChildren(...MODES.map(([id,e,n])=>{let d=document.createElement('div');d.className='scoreCard';d.innerHTML='<strong>'+e+' '+n+'</strong><br><span class="muted">Best: '+(state.scores[id]??'Not played')+'</span>';return d}))
+}
+function makeKeyboard(target,onChange){
+ const letters='QWERTYUIOPASDFGHJKLZXCVBNM'.split('');
+ target.replaceChildren();
+ letters.forEach(l=>{let b=document.createElement('button');b.type='button';b.textContent=l;b.addEventListener('click',()=>onChange(l.toLowerCase()));target.append(b)});
+ let del=document.createElement('button');del.type='button';del.className='wide';del.textContent='⌫';del.addEventListener('click',()=>onChange('BACK'));target.append(del)
+}
+function distractors(w){
+ let s=new Set(), vowels='aeiou';
+ [...w].forEach((c,i)=>{if(vowels.includes(c)){for(const v of vowels)if(v!==c)s.add(w.slice(0,i)+v+w.slice(i+1))}});
+ if(w.length>3){let i=Math.floor(w.length/2);s.add(w.slice(0,i)+w.slice(i+1));s.add(w.slice(0,i)+w[i]+w.slice(i))}
+ s.add(w+'e'); if(w.length>2)s.add(w.slice(0,-1)); s.delete(w);
+ return shuffle([...s]).slice(0,3)
+}
+function startStudy(){
+ studyIndex=0; screens('study'); showStudy()
+}
+function showStudy(){
+ const words=allWords(); if(studyIndex>=words.length){screens('home');return}
+ studyAnswer=''; $('studyCount').textContent=(studyIndex+1)+' / '+words.length;
+ $('studyWord').textContent=words[studyIndex]; $('studyWord').classList.remove('hidden');
+ $('hideStudy').classList.remove('hidden'); $('studySpell').classList.add('hidden');
+ $('studyFeedback').textContent=''; $('nextStudy').classList.add('hidden'); $('checkStudy').disabled=false;
+ $('studyAnswer').textContent='';
+}
+$('hideStudy').addEventListener('click',()=>{
+ $('studyWord').classList.add('hidden');$('hideStudy').classList.add('hidden');$('studySpell').classList.remove('hidden');
+ makeKeyboard($('studyKeyboard'),k=>{if(k==='BACK')studyAnswer=studyAnswer.slice(0,-1);else studyAnswer+=k;$('studyAnswer').textContent=studyAnswer.toUpperCase()})
+});
+$('checkStudy').addEventListener('click',()=>{
+ const w=allWords()[studyIndex].toLowerCase(), ok=studyAnswer===w;
+ $('studyFeedback').textContent=ok?'🌟 Correct! Great studying!':'Keep practising — the word is '+w+'.';
+ $('studyFeedback').className='feedback '+(ok?'good':'bad');
+ if(ok){state.stars+=2;save()}
+ $('checkStudy').disabled=true;$('nextStudy').classList.remove('hidden')
+});
+$('nextStudy').addEventListener('click',()=>{studyIndex++;showStudy()});
+
+function start(mode){
+ if(mode==='search'){startWordSearch();return}
+ if(mode==='memory'){startMemory();return}
+ game={mode,deck:shuffle(allWords()),round:0,points:0,correct:0,player:0,playerScores:[0,0],remaining:60,deadline:0,interval:null,finished:false};
+ if(mode==='time'){game.deadline=Date.now()+60000;game.interval=setInterval(()=>{if(!game||game.finished)return;game.remaining=Math.max(0,Math.ceil((game.deadline-Date.now())/1000));$('timerTag').textContent='⏱️ '+game.remaining+'s';if(game.remaining<=0)finish()},200)}
+ screens('play');question()
+}
+function stopTimer(){if(game?.interval){clearInterval(game.interval);game.interval=null}}
+function rounds(){return game.mode==='duel'?10:game.mode==='time'?999:Math.min(10,Math.max(6,game.deck.length))}
+function current(){return game.deck[game.round%game.deck.length].toLowerCase()}
+function kind(){
+ if(['whack'].includes(game.mode))return 'choice';
+ if(['scramble'].includes(game.mode))return 'tiles';
+ if(['crossword'].includes(game.mode))return 'type';
+ return ['studytype','choice','tiles'][game.round%3]
+}
+function art(mode,r){
+ const a={boss:['🐉','⚔️','💥'],race:['🏎️💨','🏁','⚡'],treasure:['🗺️','💎','🧰'],escape:['🏰','🔐','🚪'],duel:['👧','👨'],time:['⏱️','⚡','🌟'],rocket:['🚀','🌎','🌙'],scramble:['🔤','🧩','✨'],crossword:['🧩','✏️','📚'],whack:['🔨','🎯','⭐']};
+ return a[mode]?.[mode==='duel'?game.player:r%a[mode].length]||'🎮'
+}
+function question(){
+ if(!game||game.finished)return;
+ if(game.mode!=='time'&&game.round>=rounds()){finish();return}
+ if(game.mode==='time'&&Date.now()>=game.deadline){finish();return}
+ const w=current(), k=kind(), r=game.round;
+ $('modeTag').textContent=(MODES.find(x=>x[0]===game.mode)||[])[2]||'Game';
+ $('roundTag').textContent=game.mode==='time'?'Question '+(r+1):'Round '+(r+1)+' / '+rounds();
+ $('pointsTag').textContent=game.mode==='duel'?'👧 '+game.playerScores[0]+' · 👨 '+game.playerScores[1]:'⭐ '+game.points;
+ $('timerTag').classList.toggle('hidden',game.mode!=='time');$('timerTag').textContent='⏱️ '+game.remaining+'s';
+ $('progress').style.width=(game.mode==='time'?100*game.remaining/60:100*r/rounds())+'%';
+ $('stage').textContent=art(game.mode,r);$('feedback').textContent='';$('feedback').className='feedback center';
+ $('next').classList.add('hidden');$('check').classList.add('hidden');
+ $('subprompt').textContent=game.mode==='duel'?(game.player===0?"Player 1's turn":"Player 2's turn"):'';
+ const area=$('answerArea');area.replaceChildren();
+ if(k==='studytype'){
+   $('prompt').textContent='Study the word, then hide it and spell it!';
+   let word=document.createElement('div');word.className='studyWord center';word.textContent=w;
+   let hide=document.createElement('button');hide.textContent='🙈 Hide Word';
+   let box=document.createElement('div');box.className='answerBox hidden';let kb=document.createElement('div');kb.className='keyboard hidden';
+   let ans='';hide.addEventListener('click',()=>{word.classList.add('hidden');hide.classList.add('hidden');box.classList.remove('hidden');kb.classList.remove('hidden');$('check').classList.remove('hidden')});
+   makeKeyboard(kb,key=>{if(key==='BACK')ans=ans.slice(0,-1);else ans+=key;box.textContent=ans.toUpperCase()});
+   $('check').onclick=()=>submit(ans);area.append(word,hide,box,kb)
+ }else if(k==='choice'){
+   $('prompt').textContent=game.mode==='whack'?'Whack the correctly spelled word!':'Choose the correctly spelled word!';
+   let wrap=document.createElement('div');wrap.className='choices';
+   shuffle([w,...distractors(w)]).forEach(opt=>{let b=document.createElement('button');b.textContent=opt;b.addEventListener('click',()=>submit(opt));wrap.append(b)});area.append(wrap)
+ }else if(k==='tiles'){
+   $('prompt').textContent=game.mode==='scramble'?'Unscramble the letters!':'Build the spelling word!';
+   let box=document.createElement('div');box.className='answerBox';let tray=document.createElement('div');tray.className='letterTray';let chosen=[];
+   shuffle([...w].map((letter,i)=>({letter,i}))).forEach(item=>{let b=document.createElement('button');b.textContent=item.letter.toUpperCase();b.addEventListener('click',()=>{if(b.disabled)return;chosen.push(item);b.disabled=true;box.textContent=chosen.map(x=>x.letter).join('').toUpperCase()});tray.append(b)});
+   let undo=document.createElement('button');undo.className='secondary';undo.textContent='↩ Undo';undo.addEventListener('click',()=>{let x=chosen.pop();if(x){[...tray.children].forEach(b=>{if(b.disabled&&b.textContent.toLowerCase()===x.letter){b.disabled=false}});box.textContent=chosen.map(y=>y.letter).join('').toUpperCase()}});
+   $('check').classList.remove('hidden');$('check').onclick=()=>submit(chosen.map(x=>x.letter).join(''));area.append(box,tray,undo)
+ }else{
+   $('prompt').textContent='Use the clue and spell the word!';
+   $('subprompt').textContent='Clue: '+w[0].toUpperCase()+' _ '.repeat(Math.max(0,w.length-2))+(w.length>1?w.at(-1):'')+' · '+w.length+' letters';
+   let box=document.createElement('div');box.className='answerBox';let kb=document.createElement('div');kb.className='keyboard';let ans='';
+   makeKeyboard(kb,key=>{if(key==='BACK')ans=ans.slice(0,-1);else ans+=key;box.textContent=ans.toUpperCase()});
+   $('check').classList.remove('hidden');$('check').onclick=()=>submit(ans);area.append(box,kb)
+ }
+}
+function submit(raw){
+ if(!game||game.finished)return; const w=current(), ans=String(raw).trim().toLowerCase();if(!ans){$('feedback').textContent='Enter an answer first.';return}
+ const ok=ans===w;if(ok){game.correct++;game.points+=10;state.stars+=2;if(game.mode==='duel')game.playerScores[game.player]+=10;$('feedback').textContent='🌟 Correct!';$('feedback').className='feedback center good'}else{$('feedback').textContent='Good try! The word is '+w+'.';$('feedback').className='feedback center bad'}
+ save();$('answerArea').querySelectorAll('button,input').forEach(x=>x.disabled=true);$('check').classList.add('hidden');$('next').classList.remove('hidden');$('pointsTag').textContent=game.mode==='duel'?'👧 '+game.playerScores[0]+' · 👨 '+game.playerScores[1]:'⭐ '+game.points
+}
+$('next').addEventListener('click',()=>{if(!game)return;game.round++;if(game.mode==='duel')game.player=1-game.player;question()});
+function finish(){
+ if(!game||game.finished)return;game.finished=true;stopTimer();let total=game.mode==='time'?game.round:rounds(),score=game.mode==='duel'?Math.max(...game.playerScores):game.points;
+ state.scores[game.mode]=Math.max(state.scores[game.mode]||0,score);save();
+ $('finishIcon').textContent='🏆';$('finishTitle').textContent='Adventure complete!';
+ $('finishText').textContent=game.mode==='duel'?'Player 1: '+game.playerScores[0]+' · Player 2: '+game.playerScores[1]+' — great game!' :'You got '+game.correct+' correct and earned '+game.points+' points!';
+ screens('finish')
+}
+function startWordSearch(){
+ const ws=shuffle(allWords()).slice(0,Math.min(8,allWords().length)).map(x=>x.toLowerCase()), size=14, grid=Array.from({length:size},()=>Array(size).fill(''));
+ const dirs=[[1,0],[0,1],[1,1]];
+ for(const w of ws){let placed=false;for(let tries=0;tries<150&&!placed;tries++){let [dx,dy]=dirs[Math.floor(Math.random()*dirs.length)],x=Math.floor(Math.random()*size),y=Math.floor(Math.random()*size);if(x+dx*(w.length-1)>=size||y+dy*(w.length-1)>=size)continue;let ok=true;for(let i=0;i<w.length;i++){let c=grid[y+dy*i][x+dx*i];if(c&&c!==w[i])ok=false}if(ok){for(let i=0;i<w.length;i++)grid[y+dy*i][x+dx*i]=w[i];placed=true}}}
+ const letters='abcdefghijklmnopqrstuvwxyz';grid.forEach(row=>row.forEach((c,i)=>{if(!c)row[i]=letters[Math.floor(Math.random()*26)]}));
+ game={mode:'search',points:0,finished:false};screens('play');$('modeTag').textContent='Word Search';$('roundTag').textContent='Puzzle';$('pointsTag').textContent='⭐ 0';$('timerTag').classList.add('hidden');$('stage').textContent='🔎';$('progress').style.width='0%';$('prompt').textContent='Find the hidden spelling words';$('subprompt').textContent='Words may go across, down, or diagonal.';$('feedback').textContent='';
+ let area=$('answerArea');area.replaceChildren();let bank=document.createElement('div');bank.className='wordBank';ws.forEach(w=>{let s=document.createElement('span');s.textContent=w;bank.append(s)});
+ let wrap=document.createElement('div');wrap.className='wordsearch';let table=document.createElement('table');grid.forEach(row=>{let tr=document.createElement('tr');row.forEach(c=>{let td=document.createElement('td');td.textContent=c.toUpperCase();tr.append(td)});table.append(tr)});wrap.append(table);
+ let note=document.createElement('p');note.className='center muted';note.textContent='Find each word with your finger or on paper, then tap “I Found Them!”';
+ let done=document.createElement('button');done.textContent='I Found Them! ⭐';done.addEventListener('click',()=>{game.points=ws.length*10;state.stars+=ws.length;state.scores.search=Math.max(state.scores.search||0,game.points);save();$('finishText').textContent='You searched for '+ws.length+' spelling words and earned '+ws.length+' stars!';$('finishIcon').textContent='🔎🏆';screens('finish')});
+ area.append(bank,wrap,note,done);$('check').classList.add('hidden');$('next').classList.add('hidden')
+}
+function startMemory(){
+ const base=shuffle(allWords()).slice(0,6).map(x=>x.toLowerCase()), cards=shuffle(base.flatMap(w=>[{w,id:w+'a'},{w,id:w+'b'}]));let first=null,matched=new Set(),moves=0;
+ game={mode:'memory',points:0,finished:false};screens('play');$('modeTag').textContent='Memory Match';$('roundTag').textContent='0 matches';$('pointsTag').textContent='Moves: 0';$('timerTag').classList.add('hidden');$('stage').textContent='🧠';$('progress').style.width='0%';$('prompt').textContent='Match each spelling word with its twin';$('subprompt').textContent='Tap two cards at a time.';$('feedback').textContent='';
+ let area=$('answerArea');area.replaceChildren();let grid=document.createElement('div');grid.className='memoryGrid';
+ cards.forEach(card=>{let b=document.createElement('button');b.textContent='?';b.dataset.word=card.w;b.addEventListener('click',()=>{if(b.disabled||b.textContent!=='?')return;b.textContent=card.w;if(!first){first=b;return}moves++;$('pointsTag').textContent='Moves: '+moves;if(first.dataset.word===b.dataset.word){first.disabled=b.disabled=true;matched.add(card.w);state.stars+=2;$('roundTag').textContent=matched.size+' matches';$('progress').style.width=(100*matched.size/base.length)+'%';first=null;if(matched.size===base.length){let pts=Math.max(10,120-moves*5);state.scores.memory=Math.max(state.scores.memory||0,pts);save();$('finishIcon').textContent='🧠🏆';$('finishText').textContent='You matched all '+base.length+' words in '+moves+' moves!';screens('finish')}}else{let old=first;first=null;setTimeout(()=>{if(!old.disabled)old.textContent='?';if(!b.disabled)b.textContent='?'},650)}});grid.append(b)});area.append(grid);$('check').classList.add('hidden');$('next').classList.add('hidden')
+}
+function quit(){stopTimer();if(game)game.finished=true;screens('home')}
+$('homeBtn').addEventListener('click',()=>{if(state.selectedList)quit();else chooseList()});$('quit').addEventListener('click',quit);$('studyBtn').addEventListener('click',startStudy);$('scoresBtn').addEventListener('click',()=>screens('scores'));
+$('changeListBtn').addEventListener('click',chooseList);
+ $('resetScores').addEventListener('click',()=>{if(confirm('Reset all high scores and stars?')){state={stars:0,scores:{}};save();renderScores()}});
+$('again').addEventListener('click',()=>{let m=game?.mode||'boss';start(m)});$('finishHome').addEventListener('click',()=>screens('home'));
+async function load(){
+ try{
+  const r=await fetch('spelling-words.json',{cache:'no-store'}); if(!r.ok)throw Error('word list unavailable');
+  const j=await r.json(); if(!j.lists||typeof j.lists!=='object')throw Error('invalid word-list format');
+  const cleaned={};
+  for(const key of ['1A','1B','2A','2B']){
+   const src=j.lists[key]; if(!src||!Array.isArray(src.words)||!src.words.length)throw Error('missing '+key);
+   cleaned[key]={...src,words:src.words.map(x=>String(x).trim().toLowerCase()).filter(Boolean),bonus:String(src.bonus||'').trim().toLowerCase()};
+  }
+  data={...FALLBACK_DATA,...j,lists:cleaned};
+ }catch(e){data=FALLBACK_DATA}
+ if(state.selectedList&&data.lists[state.selectedList]){list=data.lists[state.selectedList];screens('home')}else{state.selectedList=null;save();chooseList()}
+ if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))
+}
+load();
+})();
+</script>
+</body>
+</html>
